@@ -1,18 +1,18 @@
-import React, { Component } from "react";
+import React from "react";
+import { connect } from 'react-redux'
+
 
 import "./App.css";
 
-class ToDoItem extends Component {
-  state = {
-    done: this.props.item.done
-  };
+// Actions
+import { changeStatus } from "./redux/actions";
 
-  handleClick = () => {
-    this.setState({ done: !this.state.done });
-  };
+function ToDoItem(props) {
 
-  render() {
-    const item = this.props.item;
+    const item = props.item;
+
+    // console.log(item)
+
     const statusIcon = done => {
       if (done) {
         return "fa fa-check-circle";
@@ -23,14 +23,22 @@ class ToDoItem extends Component {
 
     return (
       <tr className="row">
-        <td onClick={this.handleClick}>
-          <i className={statusIcon(this.state.done)} />
+        <td onClick={() => props.changeStatus(item)}>
+          <i className={statusIcon(item.done)} />
         </td>
         <td>{item.task}</td>
         <td className={item.priority}>{item.priority.toUpperCase()}</td>
+        <td><i className="fa fa-times" /></td>
       </tr>
     );
   }
-}
 
-export default ToDoItem;
+  
+  const mapDispatchToProps = dispatch => {
+    return {
+      changeStatus: task => dispatch(changeStatus(task))
+    }
+  }
+  
+
+export default connect(null, mapDispatchToProps)(ToDoItem);

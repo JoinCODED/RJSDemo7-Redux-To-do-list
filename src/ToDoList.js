@@ -1,4 +1,6 @@
 import React from "react";
+import { connect } from 'react-redux'
+
 
 // Components
 import ToDoItem from "./ToDoItem";
@@ -15,10 +17,19 @@ function ToDoList(props) {
           <th>STATUS</th>
           <th>TASK</th>
           <th>PRIORITY</th>
+          <th>DELETE</th>
         </tr>
       </thead>
       <tbody>{itemRows}</tbody>
     </table>
   );
 }
-export default ToDoList;
+
+const mapStateToProps = (state) => {
+  return {
+    items: state.tasks
+  }
+}
+
+
+export default connect(mapStateToProps)(ToDoList);

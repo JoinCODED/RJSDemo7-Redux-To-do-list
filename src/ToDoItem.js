@@ -6,29 +6,22 @@ import "./App.css";
 
 // Actions
 import { changeStatus } from "./redux/actions";
+import { deleteTask } from "./redux/actions";
 
 function ToDoItem(props) {
 
     const item = props.item;
 
-    // console.log(item)
-
-    const statusIcon = done => {
-      if (done) {
-        return "fa fa-check-circle";
-      } else {
-        return "fa fa-times-circle";
-      }
-    };
-
     return (
       <tr className="row">
         <td onClick={() => props.changeStatus(item)}>
-          <i className={statusIcon(item.done)} />
+          <i className={`fa fa-${item.done ? "check" : "times"}-circle`} />
         </td>
         <td>{item.task}</td>
         <td className={item.priority}>{item.priority.toUpperCase()}</td>
-        <td><i className="fa fa-times" /></td>
+        <td onClick={() => props.deleteTask(item)}>
+          <i className="fa fa-times" />
+        </td>
       </tr>
     );
   }
@@ -36,7 +29,8 @@ function ToDoItem(props) {
   
   const mapDispatchToProps = dispatch => {
     return {
-      changeStatus: task => dispatch(changeStatus(task))
+      changeStatus: task => dispatch(changeStatus(task)),
+      deleteTask: task => dispatch(deleteTask(task))
     }
   }
   

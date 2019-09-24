@@ -1,1 +1,1 @@
-export {changeStatus} from './tasks';
+export {changeStatus, deleteTask} from './tasks';

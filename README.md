@@ -1,138 +1,144 @@
-PRESENTATION: https://docs.google.com/presentation/d/1Kua0l4sS-RWstAyp7YMNYUg49G67CX0OAX8zoVFf-lg/edit#slide=id.p
+# Intro
 
-BACKEND: https://github.com/JoinCODED/RJSDemo4-To-do-list-BackEnd
+Walk through of the codebase. This is the to-do list wired with redux. But right now all the data is local! (show commented out axios request)
 
-1. Run the backend - show it working with postman
+# Do it the stupid way first
 
-2. install axios and import it
+(RUN THE [SERVER](https://github.com/JoinCODED/RJSDemo5-To-do-list-BackEnd))
 
-   ```bash
-   yarn add axios
-   ```
+The poor man's Thunk:
+
+1. Add a `SET_TASKS` type to `redux/actions/actionTypes.js`
+
+2. Create an action in `redux/actions/tasks.js`:
 
    ```javascript
-   import axios from "axios";
-   ```
-
-3. Use axios to make a request - show this request getting recieved by the backend:
-
-   ```jsx
-   function App() {
-     axios.get("http://localhost:8000/api/list");
-     ...
-   }
-
-   ```
-
-4. Log the thing being returned by the request:
-
-   ```jsx
-   const thing = axios.get("http://127.0.0.1:8000/api/list/");
-   console.log("Axios returned: ", thing);
-   ```
-
-5. To access the ACTUAL repsonse, we need to wrap this code in a function. Demo `async/await` and log the response object THEN log `res.data`:
-
-   ```jsx
-   function App() {
-     const getItems = async () => {
-       const thing = await axios.get("http://localhost:8000/api/list");
-       console.log(thing);
-     }
-
-     getItems();
-     ...
-   }
-   ```
-
-   to
-
-   ```jsx
-   function App() {
-     const getItems = async () => {
-       const response = await axios.get("http://localhost:8000/api/list");
-       const data = response.data;
-       console.log(data);
-     }
-
-     getItems();
-     ...
-   }
-   ```
-
-   to
-
-   ```jsx
-   function App() {
-     const getItems = async () => {
-       const thing = await axios.get("http://localhost:8000/api/list");
-       const items = response.data;
-       console.log(items);
-     }
-
-     getItems();
-     ...
-   }
-   ```
-
-6. Switch off the API to cause an error. Add a `try/catch`:
-
-   ```jsx
-   const getItems = async () => {
-     try {
-       const response = await axios.get("http://localhost:8000/api/list");
-       const items = response.data;
-       console.log(items);
-     } catch (error) {
-       console.error("SOMETHING WENT WRONG!");
-       console.error(error);
-     }
+   export const setTasks = tasks => {
+     return {
+       type: SET_TASKS,
+       payload: tasks
+     };
    };
    ```
 
-7. Turn app into a class. Add a state variable for `itemsFromAPI`. Add `setState`. Show why this is bad (open the network tab on chrome and show the thousands of requests going through!):
+3. Connect it in `App.js`:
 
-   ```jsx
-   const getItems = async () => {
-     try {
-       const response = await axios.get("http://localhost:8000/api/list");
-       const items = response.data;
-       console.log(items);
-       this.setState({ itemsFromAPI: items });
-     } catch (error) {
-       console.error("SOMETHING WENT WRONG!");
-       console.error(error);
-     }
+   ```javascript
+   const mapDispatchToProps = dispatch => {
+     return {
+       setTasks: tasks => dispatch(setTasks(tasks))
+     };
    };
    ```
 
-8. Add `componentDidMount()`. Add logs to show WHEN it runs:
+4. Call it after data loads in `App.js`:
 
-   ```jsx
-   componentDidMount() {
-     console.log("MOUNTED");
-   }
-
-   ...
-
-   render() {
-     console.log("RENDERING");
-     ...
-   }
-   ```
-
-9. Move the request into `componentDidMount` - don't forget to make it `async`:
-
-   ```jsx
+   ```javascript
    async componentDidMount() {
-       console.log("MOUNTED");
-       try {
-         const response = await axios.get("http://127.0.0.1:8000/api/list/");
-         const items = response.data;
-         this.setState({ itemsFromAPI: items });
-       } catch (err) {
-         console.error("SOMETHING WENT WRONG: ");
-         console.error(err);
-       }
+     try {
+       const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
+       const tasks = response.data;
+       this.props.setTasks(tasks)
+     } catch (err) {
+       console.error("SOMETHING WENT WRONG: ", err);
+     }
    }
    ```
+
+5. Update the reducer in `redux/reducers/tasks.js`
+
+   ```javascript
+   case SET_TASKS:
+     const tasks = action.payload
+     return {
+       ...state,
+       tasks: tasks
+     }
+   ```
+
+# The Problem with Async
+
+What we did is fine, but it would be nice if we could clean up the messy `componentDidMount` in `App.js` and move it somewhere else, like our redux actions.
+
+6. Attempt this. Copy axios request to a new action in `actions/tasks.js`:
+
+   ```javascript
+   export const getTasks = () => {
+     try {
+       const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
+       const tasks = response.data;
+       return {
+         type: SET_TASKS,
+         payload: tasks
+       }
+     } catch (err) {
+       console.error("SOMETHING WENT WRONG: ", err);
+     }
+   }
+   ```
+
+7. Connect it to `App.js` and call it in `componentDidMount`:
+
+   ```javascript
+   componentDidMount() {
+     this.props.getTasks();
+   }
+   ```
+
+   It won't work because we can't use `await` in a function that's not `async`
+
+8. Make the function `async`. Still breaks. Now `getTasks` is no longer a valid redux action function because it acutally returns a promise! (all async functions return promises)
+
+# Thunk
+
+We need something extra to handle async code in redux
+
+9. Add the redux-thunk package `yarn add redux-thunk`
+
+10. In `redux/index.js`:
+
+    ```javascript
+    import { applyMiddleware } from "redux";
+    import thunk from "redux-thunk";
+
+    const store = createStore(
+      rootReducer,
+      composeEnhancers(applyMiddleware(thunk))
+    );
+    ```
+
+# Handling Async Code
+
+Thunk gives us the option to return an `async` function from our action creators instead of a plain object. This function will get given...`dispatch`!
+
+11. Fix `getTasks` in `actions/tasks.js`:
+
+    ```javascript
+    export const getTasks = () => {
+      return async dispatch => {
+        try {
+          const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
+          const tasks = response.data;
+          dispatch({
+            type: SET_TASKS,
+            payload: tasks
+          });
+        } catch (err) {
+          console.error("SOMETHING WENT WRONG: ", err);
+        }
+      };
+    };
+    ```
+
+# An added improvement
+
+Right now we're fetching when the `App` mounts. We actually have the option to fetch much earlier.
+
+12. Remove the `componentDidMount`
+
+13. In `src/index.js` import the action and call `store.dispatch` before initial render:
+
+    ```javascript
+    ```
+
+# TODO: Change Status and Delete

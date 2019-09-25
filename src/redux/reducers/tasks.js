@@ -1,14 +1,18 @@
-import {CHANGE_STATUS, DELETE_TASK} from '../actions/actionTypes';
-
-// Data
-import tasks from '../../data';
+import {CHANGE_STATUS, DELETE_TASK, SET_TASKS} from '../actions/actionTypes';
 
 const initialState = {
-  tasks: tasks
+  tasks: []
 }
 
 export default (state = initialState, action) => {
   switch (action.type) {
+    case SET_TASKS:
+      const tasks = action.payload
+      return {
+        ...state,
+        tasks: tasks
+      }
+      
     case CHANGE_STATUS:
       const taskToChange = action.payload;
       return { 

@@ -5,7 +5,12 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { Provider } from "react-redux";
 
+// Data Loaders
+import {getTasks} from './redux/actions'
+
 import store from './redux'
+
+store.dispatch(getTasks())
 
 ReactDOM.render(
   <Provider store={store}>

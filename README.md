@@ -63,7 +63,7 @@ What we did is fine, but it would be nice if we could clean up the messy `compon
 6. Attempt this. Copy axios request to a new action in `actions/tasks.js`:
 
    ```javascript
-   export const getTasks = () => {
+   export const fetchTasks = () => {
      try {
        const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
        const tasks = response.data;
@@ -81,13 +81,13 @@ What we did is fine, but it would be nice if we could clean up the messy `compon
 
    ```javascript
    componentDidMount() {
-     this.props.getTasks();
+     this.props.fetchTasks();
    }
    ```
 
    It won't work because we can't use `await` in a function that's not `async`
 
-8. Make the function `async`. Still breaks. Now `getTasks` is no longer a valid redux action function because it acutally returns a promise! (all async functions return promises)
+8. Make the function `async`. Still breaks. Now `fetchTasks` is no longer a valid redux action function because it acutally returns a promise! (all async functions return promises)
 
 # Thunk
 
@@ -111,10 +111,10 @@ We need something extra to handle async code in redux
 
 Thunk gives us the option to return an `async` function from our action creators instead of a plain object. This function will get given...`dispatch`!
 
-11. Fix `getTasks` in `actions/tasks.js`:
+11. Fix `fetchTasks` in `actions/tasks.js`:
 
     ```javascript
-    export const getTasks = () => {
+    export const fetchTasks = () => {
       return async dispatch => {
         try {
           const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
@@ -136,9 +136,14 @@ Right now we're fetching when the `App` mounts. We actually have the option to f
 
 12. Remove the `componentDidMount`
 
-13. In `src/index.js` import the action and call `store.dispatch` before initial render:
+13. In `redux/index.js` import the action and call `store.dispatch` before initial render:
 
     ```javascript
+    import { fetchTasks } from "./actions";
+
+    ...
+
+    store.dispatch(fetchTasks())
     ```
 
 # TODO: Change Status and Delete

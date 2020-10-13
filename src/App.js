@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import "font-awesome/css/font-awesome.min.css";
@@ -7,29 +7,28 @@ import "./App.css";
 // Components
 import ToDoList from "./ToDoList";
 
-class App extends Component {
-  // state = {
-  //   tasks: []
-  // };
+const App = () => {
+  // const [tasks, setTasks] = useState([]);
 
-  // async componentDidMount() {
-  //   try {
-  //     const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
-  //     const tasks = response.data;
-  //     this.setState({ tasks: tasks });
-  //   } catch (err) {
-  //     console.error("SOMETHING WENT WRONG: ", err);
-  //   }
-  // }
+  // useEffect(() => {
+  //   const getTodoList = async () => {
+  //     try {
+  //       const response = await axios.get("http://127.0.0.1:8000/api/tasks/");
+  //       const data = response.data;
+  //       setTasks(data);
+  //     } catch (err) {
+  //       console.error("SOMETHING WENT WRONG: ", err);
+  //     }
+  //   };
+  //   getTodoList();
+  // }, []);
 
-  render() {
-    return (
-      <div className="rectangle">
-        <p className="title">TO DO LIST</p>
-        <ToDoList />
-      </div>
-    );
-  }
-}
+  return (
+    <div className="rectangle">
+      <p className="title">TO DO LIST</p>
+      <ToDoList />
+    </div>
+  );
+};
 
 export default App;
